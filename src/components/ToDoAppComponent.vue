@@ -1,38 +1,36 @@
 <template>
   <div>
     <h2>Todo List</h2>
-    <input v-model="newTask" placeholder="Enter a new task" />
-    <button class="styled-button" @click="addTask">Add Task</button>
+    <input v-model="newTask" placeholder="Enter a new task" class="styled-input" />
+    <button @click="addTask" class="styled-button">Add Task</button>
 
-    <!-- Incomplete Tasks Section -->
     <section>
       <h3>Incomplete Tasks</h3>
       <div class="task-cards">
-        <div v-for="(task, index) in $store.incompleteTasks" :key="index" class="task-card">
+        <div v-for="(task, index) in incompleteTasks" :key="index" class="task-card incomplete-task">
           <div>
             <input type="checkbox" v-model="task.done" class="styled-checkbox" @change="toggleTask(index)" />
             <label :class="{ 'task-done': task.done }">{{ task.title }}</label>
           </div>
-          <div v-if="$store.editingIndex === -1">
-            <button class="styled-button" @click="editTask(index)">Edit</button>
-            <button class="styled-button" @click="deleteTask(index)">Delete</button>
+          <div v-if="editingIndex === -1">
+            <button class="styled-button red-effect" @click="editTask(index)">Edit</button>
+            <button class="styled-button red-effect" @click="deleteTask(index)">Delete</button>
           </div>
-          <div v-if="$store.editingIndex === index">
-            <input v-model="$store.tasks[index].title" class="edit-input" />
-            <button class="styled-button" @click="saveTask(index)" :disabled="task.done">Save</button>
-            <button class="styled-button" @click="cancelEdit(index)">Cancel</button>
+          <div v-if="editingIndex === index">
+            <input v-model="tasks[index].title" class="edit-input" />
+            <button class="styled-button red-effect" @click="saveTask(index)" :disabled="task.done">Save</button>
+            <button class="styled-button red-effect" @click="cancelEdit(index)">Cancel</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Completed Tasks Section -->
     <section>
       <h3>Completed Tasks</h3>
       <div class="task-cards">
-        <div v-for="(task, index) in $store.completedTasks" :key="index" class="task-card">
+        <div v-for="(task, index) in completedTasks" :key="index" class="task-card completed-task">
           <label :class="{ 'task-done': task.done }">{{ task.title }}</label>
-          <button class="styled-button" @click="deleteTask(index)">Delete</button>
+          <button class="styled-button green-effect" @click="deleteTask(index)">Delete</button>
         </div>
       </div>
     </section>
@@ -40,7 +38,7 @@
 </template>
 
 <script>
-import { useTaskStore } from '../store/taskStore';
+import { useTaskStore } from '../store/index';
 
 export default {
   data() {
@@ -48,31 +46,45 @@ export default {
       newTask: '',
     };
   },
+  computed: {
+    incompleteTasks() {
+      return useTaskStore().incompleteTasks;
+    },
+    completedTasks() {
+      return useTaskStore().completedTasks;
+    },
+    editingIndex() {
+      return useTaskStore().editingIndex;
+    },
+    tasks() {
+      return useTaskStore().tasks;
+    },
+  },
   methods: {
     addTask() {
-      this.$store.addTask(this.newTask);
+      useTaskStore().addTask(this.newTask);
       this.newTask = '';
     },
     toggleTask(index) {
-      this.$store.toggleTask(index);
+      useTaskStore().toggleTask(index);
     },
     editTask(index) {
-      this.$store.editTask(index);
+      useTaskStore().editTask(index);
     },
     saveTask(index) {
-      this.$store.saveTask(index);
+      useTaskStore().saveTask(index);
     },
     cancelEdit(index) {
-      this.$store.cancelEdit(index);
+      useTaskStore().cancelEdit(index);
     },
     deleteTask(index) {
-      this.$store.deleteTask(index);
+      useTaskStore().deleteTask(index);
     },
   },
 };
 </script>
 
-  <style scoped>
+<style scoped>
 .task-done {
   text-decoration: line-through;
 }
@@ -126,13 +138,20 @@ main {
 }
 
 .task-card {
-  background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   padding: 10px;
   margin-right: 10px;
   min-width: 200px;
   transition: transform 0.2s ease-in-out;
+}
+
+.incomplete-task {
+  background-color: #ffb3b3; /* Light red background for incomplete tasks */
+}
+
+.completed-task {
+  background-color: #b3ffb3; /* Light green background for completed tasks */
 }
 
 .task-card:hover {
@@ -145,10 +164,18 @@ main {
   padding: 8px 16px;
   margin-right: 8px;
   cursor: pointer;
-  background-color: #3498db;
-  color: #fff;
   border: none;
   outline: none;
+}
+
+.styled-button.red-effect {
+  background-color: #9e7373; /* Red background on hover for incomplete tasks */
+  color: white;
+}
+
+.styled-button.green-effect {
+  background-color: #b5deb5; /* Green background on hover for completed tasks */
+  color: white;
 }
 
 .styled-checkbox {
@@ -161,6 +188,13 @@ main {
   margin-right: 8px;
 }
 
+.styled-input {
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  padding: 8px;
+  margin-right: 8px;
+}
+
 .edit-input {
   margin-right: 8px;
   padding: 8px;
@@ -169,5 +203,3 @@ main {
 }
 
 </style>
-
-  
